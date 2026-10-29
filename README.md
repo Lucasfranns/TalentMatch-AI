@@ -18,7 +18,22 @@ La herramienta funciona como apoyo para la revisión humana y no toma decisiones
 
 ## Estado
 
-En planificación y preparación de la estructura inicial.
+En desarrollo.
+
+### Funcionalidades implementadas
+
+- API REST con FastAPI.
+- Creación, listado y consulta de ofertas laborales.
+- Validación de datos con Pydantic.
+- Pruebas automatizadas con pytest.
+- Endpoint de salud para verificar el estado de la API.
+
+### Próximos objetivos
+
+- Persistencia de datos con PostgreSQL.
+- Carga y extracción de texto de CV en PDF.
+- Análisis asistido por inteligencia artificial.
+- Interfaz web con Next.js y TypeScript.
 
 ## Aviso de privacidad
 
