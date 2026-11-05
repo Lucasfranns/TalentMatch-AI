@@ -65,3 +65,43 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
         )
 
     return job
+
+
+@app.put("/jobs/{job_id}", response_model=Job)
+def update_job(
+    job_id: str,
+    job_data: JobCreate,
+    db: Session = Depends(get_db),
+):
+    job = db.get(JobModel, job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Oferta laboral no encontrada",
+        )
+
+    job.title = job_data.title
+    job.description = job_data.description
+    job.requirements = job_data.requirements
+
+    db.commit()
+    db.refresh(job)
+
+    return job
+
+
+@app.delete("/jobs/{job_id}", status_code=204)
+def delete_job(job_id: str, db: Session = Depends(get_db)):
+    job = db.get(JobModel, job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Oferta laboral no encontrada",
+        )
+
+    db.delete(job)
+    db.commit()
+
+    return None

@@ -120,3 +120,62 @@ def test_reject_invalid_job(client):
     response = client.post("/jobs", json=payload)
 
     assert response.status_code == 422
+
+def test_update_existing_job(client):
+    payload = {
+        "title": "Backend Junior",
+        "description": "Desarrollo de APIs para aplicaciones web.",
+        "requirements": ["Python"],
+    }
+
+    created = client.post("/jobs", json=payload).json()
+
+    updated_payload = {
+        "title": "Backend Developer Semi Senior",
+        "description": "Desarrollo de microservicios y APIs REST.",
+        "requirements": ["Python", "PostgreSQL", "Docker"],
+    }
+
+    response = client.put(
+        f"/jobs/{created['id']}",
+        json=updated_payload,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["title"] == updated_payload["title"]
+    assert response.json()["requirements"] == updated_payload["requirements"]
+
+
+def test_update_missing_job(client):
+    payload = {
+        "title": "Backend Junior",
+        "description": "Desarrollo de aplicaciones web.",
+        "requirements": ["Python"],
+    }
+
+    response = client.put("/jobs/id-inexistente", json=payload)
+
+    assert response.status_code == 404
+
+
+def test_delete_existing_job(client):
+    payload = {
+        "title": "Backend Junior",
+        "description": "Desarrollo de aplicaciones web.",
+        "requirements": ["Python"],
+    }
+
+    created = client.post("/jobs", json=payload).json()
+
+    response = client.delete(f"/jobs/{created['id']}")
+
+    assert response.status_code == 204
+
+    get_response = client.get(f"/jobs/{created['id']}")
+    assert get_response.status_code == 404
+
+
+def test_delete_missing_job(client):
+    response = client.delete("/jobs/id-inexistente")
+
+    assert response.status_code == 404
