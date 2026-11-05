@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from pypdf import PdfReader
 
 from backend.database import get_db
-from backend.models import JobModel, ResumeModel
+from backend.models import JobModel, ResumeModel, AnalysisModel
+from backend.analysis_service import analyze_resume
 
 app = FastAPI(
     title="TalentMatch AI",
@@ -41,6 +42,10 @@ class ResumeSummary(BaseModel):
 class ResumeDetail(ResumeSummary):
     extracted_text: str
 
+
+class AnalysisCreate(BaseModel):
+    job_id: str = Field(min_length=1)
+    resume_id: str = Field(min_length=1)
 
 @app.get("/health")
 def health_check():
@@ -270,3 +275,64 @@ def delete_resume(
 
     # Eliminar el archivo físico
     file_path.unlink(missing_ok=True)
+
+
+@app.post("/analyses", status_code=201)
+def create_analysis(
+    analysis_data: AnalysisCreate,
+    db: Session = Depends(get_db),
+):
+    # Buscar la oferta laboral
+    job = db.query(JobModel).filter(
+        JobModel.id == analysis_data.job_id
+    ).first()
+
+    if not job:
+        raise HTTPException(
+            status_code=404,
+            detail="No se encontró la oferta laboral",
+        )
+
+    # Buscar el currículum
+    resume = db.query(ResumeModel).filter(
+        ResumeModel.id == analysis_data.resume_id
+    ).first()
+
+    if not resume:
+        raise HTTPException(
+            status_code=404,
+            detail="No se encontró el currículum",
+        )
+
+    # Ejecutar el motor de análisis
+    result = analyze_resume(
+        requirements=job.requirements,
+        resume_text=resume.extracted_text,
+    )
+
+    # Crear el registro del análisis
+    new_analysis = AnalysisModel(
+        id=str(uuid4()),
+        job_id=job.id,
+        resume_id=resume.id,
+        match_percentage=result["match_percentage"],
+        matched_requirements=result["matched_requirements"],
+        missing_requirements=result["missing_requirements"],
+        summary=result["summary"],
+    )
+
+    # Guardar en PostgreSQL
+    db.add(new_analysis)
+    db.commit()
+    db.refresh(new_analysis)
+
+    return {
+        "id": new_analysis.id,
+        "job_id": new_analysis.job_id,
+        "resume_id": new_analysis.resume_id,
+        "match_percentage": new_analysis.match_percentage,
+        "matched_requirements": new_analysis.matched_requirements,
+        "missing_requirements": new_analysis.missing_requirements,
+        "summary": new_analysis.summary,
+        "created_at": new_analysis.created_at,
+    }

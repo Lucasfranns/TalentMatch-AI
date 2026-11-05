@@ -1,6 +1,6 @@
 # TalentMatch AI
 
-**Sistema de análisis asistido de CV y ofertas laborales mediante Inteligencia Artificial.**
+**Sistema de análisis de compatibilidad entre currículums y ofertas laborales, con integración de Inteligencia Artificial planificada.**
 
 Proyecto en desarrollo como iniciativa de aprendizaje y portfolio profesional.
 
@@ -55,6 +55,14 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 - Consulta de un currículum por identificador.
 - Eliminación de currículums y sus archivos asociados.
 
+### Análisis de compatibilidad
+
+- Comparación entre los requisitos de una oferta laboral y el texto extraído de un CV.
+- Cálculo de porcentaje de coincidencia.
+- Identificación de requisitos encontrados y faltantes.
+- Almacenamiento de resultados en PostgreSQL.
+- Consulta del historial de análisis.
+
 ### Infraestructura y calidad
 - API REST desarrollada con FastAPI.
 - Persistencia mediante PostgreSQL y SQLAlchemy.
@@ -76,6 +84,8 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 | GET | `/resumes` | Listar currículums |
 | GET | `/resumes/{resume_id}` | Consultar currículum |
 | DELETE | `/resumes/{resume_id}` | Eliminar currículum |
+| POST | `/analyses` | Crear análisis entre una oferta y un CV |
+| GET | `/analyses` | Consultar historial de análisis |
 
 ## Ejecución local
 
@@ -103,6 +113,7 @@ La documentación interactiva estará disponible en:
 
 `http://127.0.0.1:8000/docs`
 
+
 ## Pruebas
 
 Ejecutar todas las pruebas automatizadas:
@@ -113,12 +124,12 @@ python -m pytest backend\tests -v
 
 Las pruebas utilizan una base de datos SQLite independiente para evitar modificar los datos de desarrollo en PostgreSQL.
 
-**Estado actual: 17 pruebas aprobadas.**
+**Estado actual: 21 pruebas aprobadas.**
 
 ## Próximos objetivos
 
-- Implementar análisis de compatibilidad entre currículums y ofertas laborales.
-- Integrar un modelo de Inteligencia Artificial para interpretar requisitos y competencias.
+- Mejorar el algoritmo de comparación mediante técnicas de Inteligencia Artificial.
+- Integrar un modelo de IA para interpretar requisitos y competencias.
 - Generar informes explicativos de coincidencias y brechas de habilidades.
 - Desarrollar una interfaz web con Next.js y TypeScript.
 - Mejorar la cobertura de pruebas y documentación.

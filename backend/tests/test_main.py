@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 from backend.main import app
 from backend.database import get_db
-from backend.models import Base, ResumeModel
+from backend.models import Base, JobModel, ResumeModel, AnalysisModel
 
 
 # Base de datos SQLite temporal para las pruebas
@@ -309,3 +309,48 @@ def test_delete_missing_resume(client):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Currículum no encontrado"
+def test_create_and_list_analysis(client):
+    db = TestingSessionLocal()
+
+    job = JobModel(
+        id="job-analysis-test",
+        title="Backend Developer",
+        description="Desarrollo de APIs REST.",
+        requirements=["Python", "SQL", "FastAPI", "Docker"],
+    )
+
+    resume = ResumeModel(
+        id="resume-analysis-test",
+        filename="cv_test.pdf",
+        file_path="uploads/resumes/cv_test.pdf",
+        extracted_text="Tengo experiencia con Python, SQL y FastAPI.",
+    )
+
+    db.add(job)
+    db.add(resume)
+    db.commit()
+    db.close()
+
+    response = client.post(
+        "/analyses",
+        json={
+            "job_id": "job-analysis-test",
+            "resume_id": "resume-analysis-test",
+        },
+    )
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    assert data["match_percentage"] == 75
+    assert data["matched_requirements"] == [
+        "Python", "SQL", "FastAPI"
+    ]
+    assert data["missing_requirements"] == ["Docker"]
+
+    response = client.get("/analyses")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["id"] == data["id"]
