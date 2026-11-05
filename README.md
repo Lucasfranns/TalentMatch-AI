@@ -19,9 +19,12 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 - PostgreSQL
 - Pydantic
 
+### Testing
+- Pytest
+- HTTPX
+
 ### Herramientas
 - Git y GitHub
-- Pytest
 - Swagger / OpenAPI
 - Visual Studio Code
 
@@ -31,16 +34,19 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 - Registro de ofertas laborales.
 - Consulta de todas las ofertas registradas.
 - Consulta de una oferta por identificador.
+- Actualización de ofertas existentes.
+- Eliminación de ofertas.
 - Validación de datos de entrada mediante Pydantic.
 - Persistencia de información en PostgreSQL.
 - Gestión de conexiones mediante SQLAlchemy.
 - Configuración de credenciales mediante variables de entorno.
-- Pruebas automatizadas de endpoints.
+- Pruebas automatizadas de endpoints con Pytest.
 
 ## Próximos objetivos
 
-- Implementar gestión completa de ofertas laborales.
-- Incorporar carga y procesamiento de currículums.
+- Incorporar carga de currículums en formato PDF.
+- Extraer y procesar el texto de los currículums.
+- Almacenar la información de los candidatos en PostgreSQL.
 - Integrar un modelo de Inteligencia Artificial para analizar CV y ofertas.
 - Generar informes de compatibilidad entre candidatos y puestos.
 - Desarrollar una interfaz web con Next.js y TypeScript.
@@ -48,13 +54,13 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 
 ## Ejecución local
 
-Desde la raíz del proyecto:
+Desde la raíz del proyecto, activar el entorno virtual:
 
 ```powershell
 backend\.venv\Scripts\Activate.ps1
 ```
 
-Instalar dependencias:
+Instalar las dependencias:
 
 ```powershell
 pip install -r backend\requirements.txt
@@ -71,6 +77,8 @@ La documentación interactiva estará disponible en:
 `http://127.0.0.1:8000/docs`
 
 ## Pruebas
+
+Ejecutar todas las pruebas automatizadas:
 
 ```powershell
 python -m pytest backend\tests -v
