@@ -1,8 +1,11 @@
-
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from backend.database import get_db
+from backend.models import JobModel
 
 
 app = FastAPI(
@@ -24,10 +27,6 @@ class Job(JobCreate):
     id: str
 
 
-# Almacenamiento temporal en memoria
-jobs: dict[str, Job] = {}
-
-
 @app.get("/health")
 def health_check():
     return {
@@ -37,26 +36,27 @@ def health_check():
 
 
 @app.post("/jobs", response_model=Job, status_code=201)
-def create_job(job_data: JobCreate):
-    job_id = str(uuid4())
-
-    job = Job(
-        id=job_id,
+def create_job(job_data: JobCreate, db: Session = Depends(get_db)):
+    job = JobModel(
+        id=str(uuid4()),
         **job_data.model_dump(),
     )
 
-    jobs[job_id] = job
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
     return job
 
 
 @app.get("/jobs", response_model=list[Job])
-def list_jobs():
-    return list(jobs.values())
+def list_jobs(db: Session = Depends(get_db)):
+    return db.query(JobModel).all()
 
 
 @app.get("/jobs/{job_id}", response_model=Job)
-def get_job(job_id: str):
-    job = jobs.get(job_id)
+def get_job(job_id: str, db: Session = Depends(get_db)):
+    job = db.get(JobModel, job_id)
 
     if job is None:
         raise HTTPException(

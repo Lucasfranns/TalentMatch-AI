@@ -1,39 +1,69 @@
 
-from fastapi.testclient import TestClient
-
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1].parent))
 
-from main import app, jobs
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from backend.main import app
+from backend.database import get_db
+from backend.models import Base
 
 
-client = TestClient(app)
+# Base de datos SQLite temporal para las pruebas
+TEST_DATABASE_URL = "sqlite://"
+
+test_engine = create_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+
+TestingSessionLocal = sessionmaker(
+    bind=test_engine,
+    autoflush=False,
+    autocommit=False,
+)
 
 
-def setup_function():
-    # Cada prueba comienza con la lista de ofertas vacía.
-    jobs.clear()
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-def test_health_check():
+@pytest.fixture
+def client():
+    Base.metadata.create_all(bind=test_engine)
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()
+    Base.metadata.drop_all(bind=test_engine)
+
+
+def test_health_check(client):
     response = client.get("/health")
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 
-def test_create_job():
+def test_create_job(client):
     payload = {
         "title": "Desarrollador Backend Junior",
-        "description": (
-            "Buscamos un desarrollador junior para crear APIs REST."
-        ),
-        "requirements": [
-            "Conocimientos de Python",
-            "Conocimientos de SQL",
-        ],
+        "description": "Buscamos un desarrollador junior para crear APIs REST.",
+        "requirements": ["Python", "SQL"],
     }
 
     response = client.post("/jobs", json=payload)
@@ -45,7 +75,7 @@ def test_create_job():
     assert data["id"]
 
 
-def test_list_jobs():
+def test_list_jobs(client):
     payload = {
         "title": "Desarrollador Python",
         "description": "Desarrollo de servicios backend con Python.",
@@ -60,7 +90,7 @@ def test_list_jobs():
     assert len(response.json()) == 1
 
 
-def test_get_existing_job():
+def test_get_existing_job(client):
     payload = {
         "title": "Backend Junior",
         "description": "Desarrollo de APIs para aplicaciones web.",
@@ -74,13 +104,13 @@ def test_get_existing_job():
     assert response.json()["id"] == created["id"]
 
 
-def test_get_missing_job():
+def test_get_missing_job(client):
     response = client.get("/jobs/id-inexistente")
 
     assert response.status_code == 404
 
 
-def test_reject_invalid_job():
+def test_reject_invalid_job(client):
     payload = {
         "title": "AB",
         "description": "Corta",

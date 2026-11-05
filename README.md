@@ -1,40 +1,81 @@
 # TalentMatch AI
 
-Aplicación web de análisis asistido por inteligencia artificial que compara los requisitos de una oferta laboral con la evidencia presente en un CV.
+**Sistema de análisis asistido de CV y ofertas laborales mediante Inteligencia Artificial.**
 
-## Objetivo
+Proyecto en desarrollo como iniciativa de aprendizaje y portfolio profesional.
 
-Ayudar a comprender qué requisitos están respaldados por la información del CV, cuáles cuentan con evidencia parcial y cuáles no tienen evidencia identificada.
+## Descripción
 
-La herramienta funciona como apoyo para la revisión humana y no toma decisiones automáticas de contratación o rechazo.
+TalentMatch AI busca facilitar el proceso de postulación laboral mediante el análisis de ofertas de trabajo y currículums, identificando coincidencias entre los requisitos solicitados y las competencias de los candidatos.
 
-## Tecnologías previstas
+El objetivo es proporcionar información útil para la toma de decisiones, sin reemplazar el criterio humano en los procesos de selección.
 
-- **Frontend:** Next.js y TypeScript
-- **Backend:** Python y FastAPI
-- **Base de datos:** PostgreSQL
-- **Inteligencia artificial:** API de un modelo de lenguaje
-- **Control de versiones:** Git y GitHub
+## Tecnologías
+
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Pydantic
+
+### Herramientas
+- Git y GitHub
+- Pytest
+- Swagger / OpenAPI
+- Visual Studio Code
+
+## Funcionalidades implementadas
+
+- API REST desarrollada con FastAPI.
+- Registro de ofertas laborales.
+- Consulta de todas las ofertas registradas.
+- Consulta de una oferta por identificador.
+- Validación de datos de entrada mediante Pydantic.
+- Persistencia de información en PostgreSQL.
+- Gestión de conexiones mediante SQLAlchemy.
+- Configuración de credenciales mediante variables de entorno.
+- Pruebas automatizadas de endpoints.
+
+## Próximos objetivos
+
+- Implementar gestión completa de ofertas laborales.
+- Incorporar carga y procesamiento de currículums.
+- Integrar un modelo de Inteligencia Artificial para analizar CV y ofertas.
+- Generar informes de compatibilidad entre candidatos y puestos.
+- Desarrollar una interfaz web con Next.js y TypeScript.
+- Mejorar la cobertura de pruebas y documentación.
+
+## Ejecución local
+
+Desde la raíz del proyecto:
+
+```powershell
+backend\.venv\Scripts\Activate.ps1
+```
+
+Instalar dependencias:
+
+```powershell
+pip install -r backend\requirements.txt
+```
+
+Iniciar el servidor:
+
+```powershell
+python -m uvicorn backend.main:app --reload
+```
+
+La documentación interactiva estará disponible en:
+
+`http://127.0.0.1:8000/docs`
+
+## Pruebas
+
+```powershell
+python -m pytest backend\tests -v
+```
 
 ## Estado
 
 En desarrollo.
-
-### Funcionalidades implementadas
-
-- API REST con FastAPI.
-- Creación, listado y consulta de ofertas laborales.
-- Validación de datos con Pydantic.
-- Pruebas automatizadas con pytest.
-- Endpoint de salud para verificar el estado de la API.
-
-### Próximos objetivos
-
-- Persistencia de datos con PostgreSQL.
-- Carga y extracción de texto de CV en PDF.
-- Análisis asistido por inteligencia artificial.
-- Interfaz web con Next.js y TypeScript.
-
-## Aviso de privacidad
-
-La aplicación deberá tratar los CV como información personal, proteger los datos y evitar publicar documentos o credenciales sensibles.
