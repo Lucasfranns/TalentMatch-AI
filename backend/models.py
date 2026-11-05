@@ -30,3 +30,12 @@ class JobModel(Base):
         JSON,
         nullable=False,
     )
+    
+
+class ResumeModel(Base):
+    __tablename__ = "resumes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    extracted_text: Mapped[str] = mapped_column(Text, nullable=False)

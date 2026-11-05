@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 from backend.main import app
 from backend.database import get_db
-from backend.models import Base
+from backend.models import Base, ResumeModel
 
 
 # Base de datos SQLite temporal para las pruebas
@@ -179,3 +179,133 @@ def test_delete_missing_job(client):
     response = client.delete("/jobs/id-inexistente")
 
     assert response.status_code == 404
+    
+def test_list_resumes(client):
+    db = TestingSessionLocal()
+
+    resumes = [
+        ResumeModel(
+            id="resume-1",
+            filename="cv_juan.pdf",
+            file_path="uploads/resumes/resume-1.pdf",
+            extracted_text="Experiencia en Python y SQL.",
+        ),
+        ResumeModel(
+            id="resume-2",
+            filename="cv_maria.pdf",
+            file_path="uploads/resumes/resume-2.pdf",
+            extracted_text="Experiencia en Java y PostgreSQL.",
+        ),
+    ]
+
+    db.add_all(resumes)
+    db.commit()
+    db.close()
+
+    response = client.get("/resumes")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_get_existing_resume(client):
+    db = TestingSessionLocal()
+
+    resume = ResumeModel(
+        id="resume-123",
+        filename="cv_juan.pdf",
+        file_path="uploads/resumes/resume-123.pdf",
+        extracted_text="Experiencia en Python y SQL.",
+    )
+
+    db.add(resume)
+    db.commit()
+    db.close()
+
+    response = client.get("/resumes/resume-123")
+
+    assert response.status_code == 200
+    assert response.json()["filename"] == "cv_juan.pdf"
+    assert response.json()["extracted_text"] == "Experiencia en Python y SQL."
+
+
+def test_get_missing_resume(client):
+    response = client.get("/resumes/id-inexistente")
+
+    assert response.status_code == 404
+
+
+def test_reject_non_pdf_resume(client):
+    response = client.post(
+        "/resumes",
+        files={
+            "file": (
+                "documento.txt",
+                b"Este archivo no es un PDF.",
+                "text/plain",
+            )
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "El archivo debe tener extensión PDF"
+    
+def test_reject_invalid_pdf_content(client):
+    response = client.post(
+        "/resumes",
+        files={
+            "file": (
+                "curriculum.pdf",
+                b"Este contenido no es un PDF real.",
+                "application/pdf",
+            )
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "El archivo no es un PDF válido"
+   
+# Verificar que se pueda eliminar un currículum existente 
+def test_delete_existing_resume(client, tmp_path, monkeypatch):
+    import backend.main as main
+
+    # Simular la estructura de carpetas del proyecto
+    upload_dir = tmp_path / "uploads" / "resumes"
+    upload_dir.mkdir(parents=True)
+
+    # Redirigir las rutas a la carpeta temporal
+    monkeypatch.setattr(main, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(main, "UPLOAD_DIR", upload_dir)
+
+    pdf_path = upload_dir / "resume-123.pdf"
+    pdf_path.write_bytes(b"PDF de prueba")
+
+    db = TestingSessionLocal()
+
+    resume = ResumeModel(
+        id="resume-123",
+        filename="cv_juan.pdf",
+        file_path="uploads/resumes/resume-123.pdf",
+        extracted_text="Experiencia en Python.",
+    )
+
+    db.add(resume)
+    db.commit()
+    db.close()
+
+    response = client.delete("/resumes/resume-123")
+
+    assert response.status_code == 204
+    assert not pdf_path.exists()
+
+    response = client.get("/resumes")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+    
+# Verificar que no se pueda eliminar un currículum inexistente
+def test_delete_missing_resume(client):
+    response = client.delete("/resumes/id-inexistente")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Currículum no encontrado"

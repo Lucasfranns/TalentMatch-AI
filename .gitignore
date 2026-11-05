@@ -29,3 +29,6 @@ Thumbs.db
 # Uploaded resumes and personal data
 uploads/
 *.pdf
+
+# Curriculums cargados por usuarios
+uploads/

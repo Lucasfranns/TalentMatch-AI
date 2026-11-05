@@ -13,15 +13,20 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 ## Tecnologías
 
 ### Backend
-- Python
+- Python 3.12
 - FastAPI
 - SQLAlchemy
 - PostgreSQL
 - Pydantic
 
+### Procesamiento de documentos
+- pypdf
+- python-multipart
+
 ### Testing
 - Pytest
 - HTTPX
+- SQLite para pruebas automatizadas
 
 ### Herramientas
 - Git y GitHub
@@ -30,27 +35,47 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 
 ## Funcionalidades implementadas
 
-- API REST desarrollada con FastAPI.
+### Gestión de ofertas laborales
 - Registro de ofertas laborales.
 - Consulta de todas las ofertas registradas.
 - Consulta de una oferta por identificador.
 - Actualización de ofertas existentes.
 - Eliminación de ofertas.
 - Validación de datos de entrada mediante Pydantic.
-- Persistencia de información en PostgreSQL.
-- Gestión de conexiones mediante SQLAlchemy.
+
+### Gestión de currículums
+- Carga de currículums en formato PDF.
+- Validación del formato y tamaño de los archivos (máximo 10 MB).
+- Rechazo de archivos inválidos y documentos protegidos con contraseña.
+- Extracción de texto mediante pypdf.
+- Detección de documentos sin texto extraíble.
+- Almacenamiento de archivos PDF en el servidor.
+- Persistencia de metadatos y texto extraído en PostgreSQL.
+- Consulta de todos los currículums registrados.
+- Consulta de un currículum por identificador.
+- Eliminación de currículums y sus archivos asociados.
+
+### Infraestructura y calidad
+- API REST desarrollada con FastAPI.
+- Persistencia mediante PostgreSQL y SQLAlchemy.
 - Configuración de credenciales mediante variables de entorno.
+- Documentación interactiva mediante Swagger.
 - Pruebas automatizadas de endpoints con Pytest.
 
-## Próximos objetivos
+## Endpoints disponibles
 
-- Incorporar carga de currículums en formato PDF.
-- Extraer y procesar el texto de los currículums.
-- Almacenar la información de los candidatos en PostgreSQL.
-- Integrar un modelo de Inteligencia Artificial para analizar CV y ofertas.
-- Generar informes de compatibilidad entre candidatos y puestos.
-- Desarrollar una interfaz web con Next.js y TypeScript.
-- Mejorar la cobertura de pruebas y documentación.
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/health` | Verificar estado de la API |
+| POST | `/jobs` | Crear oferta laboral |
+| GET | `/jobs` | Listar ofertas |
+| GET | `/jobs/{job_id}` | Consultar oferta |
+| PUT | `/jobs/{job_id}` | Actualizar oferta |
+| DELETE | `/jobs/{job_id}` | Eliminar oferta |
+| POST | `/resumes` | Cargar currículum PDF |
+| GET | `/resumes` | Listar currículums |
+| GET | `/resumes/{resume_id}` | Consultar currículum |
+| DELETE | `/resumes/{resume_id}` | Eliminar currículum |
 
 ## Ejecución local
 
@@ -65,6 +90,8 @@ Instalar las dependencias:
 ```powershell
 pip install -r backend\requirements.txt
 ```
+
+Configurar la variable `DATABASE_URL` en un archivo `.env` ubicado en la raíz del proyecto.
 
 Iniciar el servidor:
 
@@ -83,6 +110,18 @@ Ejecutar todas las pruebas automatizadas:
 ```powershell
 python -m pytest backend\tests -v
 ```
+
+Las pruebas utilizan una base de datos SQLite independiente para evitar modificar los datos de desarrollo en PostgreSQL.
+
+**Estado actual: 17 pruebas aprobadas.**
+
+## Próximos objetivos
+
+- Implementar análisis de compatibilidad entre currículums y ofertas laborales.
+- Integrar un modelo de Inteligencia Artificial para interpretar requisitos y competencias.
+- Generar informes explicativos de coincidencias y brechas de habilidades.
+- Desarrollar una interfaz web con Next.js y TypeScript.
+- Mejorar la cobertura de pruebas y documentación.
 
 ## Estado
 
