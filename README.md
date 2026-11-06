@@ -62,6 +62,8 @@ El objetivo es proporcionar información útil para la toma de decisiones, sin r
 - Identificación de requisitos encontrados y faltantes.
 - Almacenamiento de resultados en PostgreSQL.
 - Consulta del historial de análisis.
+- Reconocimiento de alias y nombres alternativos de tecnologías (JavaScript/JS, PostgreSQL/Postgres, Node.js/NodeJS).
+- Prevención de coincidencias parciales incorrectas entre nombres de tecnologías.
 
 ### Infraestructura y calidad
 - API REST desarrollada con FastAPI.
@@ -124,7 +126,7 @@ python -m pytest backend\tests -v
 
 Las pruebas utilizan una base de datos SQLite independiente para evitar modificar los datos de desarrollo en PostgreSQL.
 
-**Estado actual: 21 pruebas aprobadas.**
+**Estado actual: 24 pruebas aprobadas.**
 
 ## Próximos objetivos
 

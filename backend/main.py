@@ -336,3 +336,27 @@ def create_analysis(
         "summary": new_analysis.summary,
         "created_at": new_analysis.created_at,
     }
+
+
+
+@app.get("/analyses")
+def list_analyses(db: Session = Depends(get_db)):
+    analyses = (
+        db.query(AnalysisModel)
+        .order_by(AnalysisModel.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": analysis.id,
+            "job_id": analysis.job_id,
+            "resume_id": analysis.resume_id,
+            "match_percentage": analysis.match_percentage,
+            "matched_requirements": analysis.matched_requirements,
+            "missing_requirements": analysis.missing_requirements,
+            "summary": analysis.summary,
+            "created_at": analysis.created_at,
+        }
+        for analysis in analyses
+    ]
