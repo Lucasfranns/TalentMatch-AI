@@ -86,3 +86,66 @@ def test_analyze_resume_with_aliases_in_requirements():
     assert result["match_percentage"] == 100
     assert result["matched_requirements"] == requirements
     assert result["missing_requirements"] == []
+
+
+def test_analyze_resume_with_related_concepts():
+    requirements = [
+        "Desarrollo de servicios web"
+    ]
+
+    resume_text = """
+    Experiencia desarrollando APIs REST
+    utilizando Node.js y Express.
+    """
+
+    result = analyze_resume(requirements, resume_text)
+
+    assert result["match_percentage"] == 100
+    assert result["matched_requirements"] == requirements
+    assert result["missing_requirements"] == []
+
+
+def test_analyze_resume_does_not_match_superficially_related_concepts():
+    requirements = [
+        "Desarrollo de servicios web"
+    ]
+
+    resume_text = """
+    Experiencia en desarrollo de sitios web
+    utilizando HTML, CSS y JavaScript.
+    """
+
+    result = analyze_resume(requirements, resume_text)
+
+    assert result["match_percentage"] == 0
+    assert result["matched_requirements"] == []
+    assert result["missing_requirements"] == requirements
+
+
+def test_analyze_resume_does_not_match_unrelated_concepts():
+    requirements = [
+        "Desarrollo de servicios web"
+    ]
+
+    resume_text = """
+    Experiencia en diseño de sitios web
+    utilizando HTML y CSS.
+    """
+
+    result = analyze_resume(requirements, resume_text)
+
+    assert result["match_percentage"] == 0
+    assert result["matched_requirements"] == []
+    assert result["missing_requirements"] == requirements
+
+
+def test_analyze_resume_without_requirements():
+    requirements = []
+    resume_text = "Experiencia en desarrollo de software."
+
+    result = analyze_resume(requirements, resume_text)
+
+    assert result["match_percentage"] == 0
+    assert result["matched_requirements"] == []
+    assert result["missing_requirements"] == []
+    assert "no contiene requisitos" in result["summary"]
